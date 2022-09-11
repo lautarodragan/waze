@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     canvasContext.beginPath()
     canvasContext.strokeStyle = !isBlue ? `rgb(${red}, 0, 0)` : 'blue'
-    canvasContext.lineWidth = !isBlue ? 1 : 2
+    canvasContext.lineWidth = !isBlue ? 1 : 3
     canvasContext.moveTo(startAvenueIndex * blockSize, startStreetIndex * blockSize)
     canvasContext.lineTo(endAvenueIndex * blockSize, endStreetIndex * blockSize)
     canvasContext.stroke()
