@@ -12,8 +12,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('max transit times', maxTransitTimes)
 
   const blockSize = 30
+  let isDirty = true
 
   const render = () => {
+    if (!isDirty) {
+      requestAnimationFrame(render)
+      return
+    }
+
     canvasContext.clearRect(0, 0, canvas.width, canvas.height)
     canvasContext.scale(devicePixelRatio, devicePixelRatio)
     canvasContext.translate(200, 200)
@@ -40,12 +46,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       canvasContext.stroke()
     }
 
+    isDirty = false
+    requestAnimationFrame(render)
   }
 
   const setCanvasSize = () => {
     canvas.width = window.innerWidth * devicePixelRatio
     canvas.height = window.innerHeight * devicePixelRatio
-    requestAnimationFrame(render)
+    isDirty = true
   }
 
   setCanvasSize()
