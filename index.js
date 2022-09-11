@@ -101,11 +101,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       selectedMeasurementIndex--
     else if (event.key === 'ArrowUp')
       selectedMeasurementIndex++
-    // console.log('selectedMeasurementIndex', selectedMeasurementIndex)
+
     if (selectedMeasurementIndex < 0)
       selectedMeasurementIndex = trafficMeasurements[0].measurements.length - 1
     else if (selectedMeasurementIndex >= trafficMeasurements[0].measurements.length)
       selectedMeasurementIndex = 0
+
     isDirty = true
   })
 })
