@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const render = () => {
     canvasContext.clearRect(0, 0, canvas.width, canvas.height)
-    // canvasContext.scale(blockSize, blockSize)
-    canvasContext.translate(200, 0)
+    canvasContext.scale(devicePixelRatio, devicePixelRatio)
+    canvasContext.translate(200, 200)
 
     const [ trafficMeasurement ] = trafficMeasurements
     const [ maxTransitTime ] = maxTransitTimes
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('trafficMeasurement', trafficMeasurement)
     console.log('maxTransitTime', maxTransitTime)
 
-    for (const measurement of trafficMeasurement.measurements) {
+    for (const measurement of trafficMeasurement.measurements.slice(1)) {
       const startAvenueIndex = measurement.startAvenue.charCodeAt(0) - 65
       const endAvenueIndex = measurement.endAvenue.charCodeAt(0) - 65
       const startStreetIndex = parseInt(measurement.startStreet)
@@ -35,16 +35,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       canvasContext.beginPath()
       canvasContext.strokeStyle = `rgb(${red}, 0, 0)`
-      canvasContext.moveTo(startAvenueIndex * blockSize, startStreetIndex * blockSize)
-      canvasContext.lineTo(endAvenueIndex * blockSize, endStreetIndex * blockSize)
+      canvasContext.moveTo(startStreetIndex * blockSize, startAvenueIndex * blockSize)
+      canvasContext.lineTo(endStreetIndex * blockSize, endAvenueIndex * blockSize)
       canvasContext.stroke()
     }
 
   }
 
   const setCanvasSize = () => {
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    canvas.width = window.innerWidth * devicePixelRatio
+    canvas.height = window.innerHeight * devicePixelRatio
     requestAnimationFrame(render)
   }
 
