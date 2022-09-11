@@ -5,15 +5,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   console.log('transitSamples', trafficMeasurements)
 
-  const minTransitTimes = trafficMeasurements.map(_ => _.measurements.reduce(min, 0))
-  const maxTransitTimes = trafficMeasurements.map(_ => _.measurements.reduce(max, 0))
+  const minTransitTimes = trafficMeasurements.map(_ => _.measurements.reduce(min('transitTime'), 0))
+  const maxTransitTimes = trafficMeasurements.map(_ => _.measurements.reduce(max('transitTime'), 0))
+  const lowestStreets = trafficMeasurements.map(_ => _.measurements.reduce(min('startStreet'), 0))
+  const highestStreets = trafficMeasurements.map(_ => _.measurements.reduce(max('startStreet'), 0))
+  const lowestAvenues = trafficMeasurements.map(_ => _.measurements.reduce(min('startAvenue'), 0))
+  const highestAvenues = trafficMeasurements.map(_ => _.measurements.reduce(max('startAvenue'), 0))
 
   console.log('min transit times', minTransitTimes)
   console.log('max transit times', maxTransitTimes)
+  console.log('lowestStreets', lowestStreets)
+  console.log('highestStreets', highestStreets)
+  console.log('lowestAvenues', lowestAvenues)
+  console.log('highestAvenues', highestAvenues)
 
   const blockSize = 30
   let isDirty = true
   let selectedMeasurementIndex = 0
+  let translateX
+  let translateY
 
   const render = () => {
     if (!isDirty) {
@@ -21,12 +31,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       return
     }
 
-    canvasContext.setTransform(1, 0, 0, 1, 0, 0);
-    canvasContext.clearRect(10, 10, canvas.width, canvas.height)
+    if (translateX === undefined || translateY === undefined) {
+      translateX = canvas.width / 2 / devicePixelRatio - 15 * blockSize
+      translateY = canvas.height / 2 / devicePixelRatio - 10 * blockSize
+    }
+
+    canvasContext.resetTransform()
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height)
     canvasContext.scale(devicePixelRatio, devicePixelRatio)
-    canvasContext.translate(200, 200)
 
     const [ trafficMeasurement ] = trafficMeasurements
+
+    const selectedMeasurement = trafficMeasurement.measurements[selectedMeasurementIndex]
+
+    canvasContext.font = '20px serif';
+    canvasContext.fillText(`id: ${selectedMeasurementIndex}`, 10, 30)
+    if (selectedMeasurement) {
+      canvasContext.fillText(`avenues: ${selectedMeasurement.startAvenue} -> ${selectedMeasurement.endAvenue}`, 10, 60)
+      canvasContext.fillText(`streets: ${selectedMeasurement.startStreet} -> ${selectedMeasurement.endStreet}`, 10, 90)
+    }
+
+    canvasContext.translate(translateX, translateY)
+
 
     for (let i = 0; i < trafficMeasurement.measurements.length; i++) {
       renderSingleMeasurement(trafficMeasurement.measurements[i], i === selectedMeasurementIndex)
@@ -41,8 +67,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const startAvenueIndex = measurement.startAvenue.charCodeAt(0) - 65
     const endAvenueIndex = measurement.endAvenue.charCodeAt(0) - 65
-    const startStreetIndex = parseInt(measurement.startStreet)
-    const endStreetIndex = parseInt(measurement.endStreet)
+    const startStreetIndex = parseInt(measurement.startStreet) - 1
+    const endStreetIndex = parseInt(measurement.endStreet) - 1
 
     const red = Math.floor(measurement.transitTime / maxTransitTime * 256)
 
@@ -58,6 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     canvas.width = window.innerWidth * devicePixelRatio
     canvas.height = window.innerHeight * devicePixelRatio
     isDirty = true
+    translateX = undefined
   }
 
   setCanvasSize()
@@ -75,11 +102,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (event.key === 'ArrowUp')
       selectedMeasurementIndex++
     // console.log('selectedMeasurementIndex', selectedMeasurementIndex)
+    if (selectedMeasurementIndex < 0)
+      selectedMeasurementIndex = trafficMeasurements[0].measurements.length - 1
+    else if (selectedMeasurementIndex >= trafficMeasurements[0].measurements.length)
+      selectedMeasurementIndex = 0
     isDirty = true
   })
 })
 
 const loadTransitSamples = () => fetch('/sample-data.json').then(_ => _.json())
 
-const max = (acc, curr) => curr.transitTime > acc ? curr.transitTime : acc
-const min = (acc, curr) => curr.transitTime < acc ? curr.transitTime : acc
+const max = (propName) => (acc, curr) => curr[propName] > acc ? curr[propName] : acc
+const min = (propName) => (acc, curr) => curr[propName] < acc ? curr[propName] : acc
