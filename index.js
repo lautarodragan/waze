@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (selectedMeasurement) {
       canvasContext.fillText(`avenues: ${selectedMeasurement.startAvenue} -> ${selectedMeasurement.endAvenue}`, 10, 60)
       canvasContext.fillText(`streets: ${selectedMeasurement.startStreet} -> ${selectedMeasurement.endStreet}`, 10, 90)
+      canvasContext.fillText(`transit: ${selectedMeasurement.transitTime}`, 10, 120)
     }
 
     canvasContext.translate(translateX, translateY)
