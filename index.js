@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (translateX === undefined || translateY === undefined) {
-      translateX = canvas.width / 2 / devicePixelRatio - 15 * blockSize
-      translateY = canvas.height / 2 / devicePixelRatio - 10 * blockSize
+      translateX = canvas.width / 2 / devicePixelRatio - 10 * blockSize
+      translateY = canvas.height / 2 / devicePixelRatio - 15 * blockSize
     }
 
     canvasContext.resetTransform()
@@ -76,8 +76,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     canvasContext.beginPath()
     canvasContext.strokeStyle = !isBlue ? `rgb(${red}, 0, 0)` : 'blue'
     canvasContext.lineWidth = !isBlue ? 1 : 2
-    canvasContext.moveTo(startStreetIndex * blockSize, startAvenueIndex * blockSize)
-    canvasContext.lineTo(endStreetIndex * blockSize, endAvenueIndex * blockSize)
+    canvasContext.moveTo(startAvenueIndex * blockSize, startStreetIndex * blockSize)
+    canvasContext.lineTo(endAvenueIndex * blockSize, endStreetIndex * blockSize)
     canvasContext.stroke()
   }
 
