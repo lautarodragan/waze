@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const blockSize = 30
   let isDirty = true
+  let selectedMeasurementIndex = 0
 
   const render = () => {
     if (!isDirty) {
@@ -20,34 +21,37 @@ document.addEventListener('DOMContentLoaded', async () => {
       return
     }
 
-    canvasContext.clearRect(0, 0, canvas.width, canvas.height)
+    canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+    canvasContext.clearRect(10, 10, canvas.width, canvas.height)
     canvasContext.scale(devicePixelRatio, devicePixelRatio)
     canvasContext.translate(200, 200)
 
     const [ trafficMeasurement ] = trafficMeasurements
-    const [ maxTransitTime ] = maxTransitTimes
 
-    console.log('trafficMeasurement', trafficMeasurement)
-    console.log('maxTransitTime', maxTransitTime)
-
-    for (const measurement of trafficMeasurement.measurements.slice(1)) {
-      const startAvenueIndex = measurement.startAvenue.charCodeAt(0) - 65
-      const endAvenueIndex = measurement.endAvenue.charCodeAt(0) - 65
-      const startStreetIndex = parseInt(measurement.startStreet)
-      const endStreetIndex = parseInt(measurement.endStreet)
-
-      const red = Math.floor(measurement.transitTime / maxTransitTime * 256)
-      // console.log('red', red)
-
-      canvasContext.beginPath()
-      canvasContext.strokeStyle = `rgb(${red}, 0, 0)`
-      canvasContext.moveTo(startStreetIndex * blockSize, startAvenueIndex * blockSize)
-      canvasContext.lineTo(endStreetIndex * blockSize, endAvenueIndex * blockSize)
-      canvasContext.stroke()
+    for (let i = 0; i < trafficMeasurement.measurements.length; i++) {
+      renderSingleMeasurement(trafficMeasurement.measurements[i], i === selectedMeasurementIndex)
     }
 
     isDirty = false
     requestAnimationFrame(render)
+  }
+
+  const renderSingleMeasurement = (measurement, isBlue) => {
+    const [ maxTransitTime ] = maxTransitTimes
+
+    const startAvenueIndex = measurement.startAvenue.charCodeAt(0) - 65
+    const endAvenueIndex = measurement.endAvenue.charCodeAt(0) - 65
+    const startStreetIndex = parseInt(measurement.startStreet)
+    const endStreetIndex = parseInt(measurement.endStreet)
+
+    const red = Math.floor(measurement.transitTime / maxTransitTime * 256)
+
+    canvasContext.beginPath()
+    canvasContext.strokeStyle = !isBlue ? `rgb(${red}, 0, 0)` : 'blue'
+    canvasContext.lineWidth = !isBlue ? 1 : 2
+    canvasContext.moveTo(startStreetIndex * blockSize, startAvenueIndex * blockSize)
+    canvasContext.lineTo(endStreetIndex * blockSize, endAvenueIndex * blockSize)
+    canvasContext.stroke()
   }
 
   const setCanvasSize = () => {
@@ -62,6 +66,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   window.addEventListener('resize', () => {
     setCanvasSize()
+  })
+
+  document.addEventListener('keydown', event => {
+    // console.log('keydown', event)
+    if (event.key === 'ArrowDown')
+      selectedMeasurementIndex--
+    else if (event.key === 'ArrowUp')
+      selectedMeasurementIndex++
+    // console.log('selectedMeasurementIndex', selectedMeasurementIndex)
+    isDirty = true
   })
 })
 
