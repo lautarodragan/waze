@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let isDirty = true
   let selectedMeasurementIndex = 0
   let highlightedMeasurementIndex = null
+  let highlightedCorner = null
   let translateX
   let translateY
 
@@ -46,11 +47,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const selectedMeasurement = trafficMeasurement.measurements[selectedMeasurementIndex]
 
     canvasContext.font = '20px serif';
+    canvasContext.fillStyle = 'black'
     canvasContext.fillText(`id: ${selectedMeasurementIndex}`, 10, 30)
     if (selectedMeasurement) {
       canvasContext.fillText(`avenues: ${selectedMeasurement.startAvenue} -> ${selectedMeasurement.endAvenue}`, 10, 60)
       canvasContext.fillText(`streets: ${selectedMeasurement.startStreet} -> ${selectedMeasurement.endStreet}`, 10, 90)
       canvasContext.fillText(`transit: ${selectedMeasurement.transitTime}`, 10, 120)
+      if (highlightedCorner)
+        canvasContext.fillText(`transit: ${highlightedCorner.startAvenue}, ${highlightedCorner.startStreet}`, 10, 150)
     }
 
     canvasContext.translate(translateX, translateY)
@@ -59,6 +63,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     for (let i = 0; i < trafficMeasurement.measurements.length; i++) {
       const color = i === selectedMeasurementIndex ? 'blue' : i === highlightedMeasurementIndex ? 'orange' : null
       renderSingleMeasurement(trafficMeasurement.measurements[i], color)
+    }
+
+    if (highlightedCorner) {
+      const x = (highlightedCorner.startAvenue.charCodeAt(0) - 65) * blockSize // - blockSize / 2
+      const y = (parseInt(highlightedCorner.startStreet) - 1) * blockSize // - blockSize / 2
+      canvasContext.fillStyle = 'orange'
+      canvasContext.beginPath();
+      canvasContext.arc(x, y, blockSize / 4, 0, 2 * Math.PI);
+      canvasContext.fill();
     }
 
     isDirty = false
@@ -132,11 +145,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       return (translatedX >= x1 - padding && translatedX <= x2 + padding && translatedY >= y1 - padding && translatedY <= y2 + padding)
     })
 
-    highlightedMeasurementIndex = trafficMeasurementIndex
-    isDirty = true
+    const corner = trafficMeasurements[0].measurements.find(measurement => {
+      const startAvenueIndex = measurement.startAvenue.charCodeAt(0) - 65
+      const startStreetIndex = parseInt(measurement.startStreet) - 1
+      const x = startAvenueIndex * blockSize
+      const y = startStreetIndex * blockSize
 
-    console.log('highlightedMeasurementIndex', highlightedMeasurementIndex)
+      return (translatedX >= x - blockSize / 2 && translatedX <= x + blockSize / 2 && translatedY >= y - blockSize / 2 && translatedY <= y + blockSize / 2)
+    })
 
+    // highlightedMeasurementIndex = trafficMeasurementIndex
+    if (corner !== highlightedCorner) {
+      highlightedCorner = corner
+      isDirty = true
+    }
   })
 })
 
