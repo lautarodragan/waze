@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let selectedMeasurementIndex = 0
   let highlightedMeasurementIndex = null
   let highlightedCorner = null
+  let selectedCornerA = null
+  let selectedCornerB = null
   let translateX
   let translateY
 
@@ -53,8 +55,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       canvasContext.fillText(`avenues: ${selectedMeasurement.startAvenue} -> ${selectedMeasurement.endAvenue}`, 10, 60)
       canvasContext.fillText(`streets: ${selectedMeasurement.startStreet} -> ${selectedMeasurement.endStreet}`, 10, 90)
       canvasContext.fillText(`transit: ${selectedMeasurement.transitTime}`, 10, 120)
+      canvasContext.fillText(`corner A: ${selectedCornerA?.startAvenue} Avenue, ${selectedCornerA?.startStreet} Street`, 10, 150)
+      canvasContext.fillText(`corner B: ${selectedCornerB?.startAvenue} Avenue, ${selectedCornerB?.startStreet} Street`, 10, 180)
       if (highlightedCorner)
-        canvasContext.fillText(`transit: ${highlightedCorner.startAvenue}, ${highlightedCorner.startStreet}`, 10, 150)
+        canvasContext.fillText(`corner on mouse: ${highlightedCorner.startAvenue} Avenue, ${highlightedCorner.startStreet} Street`, 10, 210)
     }
 
     canvasContext.translate(translateX, translateY)
@@ -159,6 +163,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       highlightedCorner = corner
       isDirty = true
     }
+  })
+
+  canvas.addEventListener('click', event => {
+    selectedCornerA = highlightedCorner
+    isDirty = true
+  })
+
+  canvas.addEventListener('contextmenu', event => {
+    event.preventDefault()
+    selectedCornerB = highlightedCorner
+    isDirty = true
   })
 })
 
