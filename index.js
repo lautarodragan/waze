@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const blockSize = 30
   let isDirty = true
   let selectedMeasurementIndex = 0
+  let highlightedMeasurementIndex = null
   let translateX
   let translateY
 
@@ -56,14 +57,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     for (let i = 0; i < trafficMeasurement.measurements.length; i++) {
-      renderSingleMeasurement(trafficMeasurement.measurements[i], i === selectedMeasurementIndex)
+      const color = i === selectedMeasurementIndex ? 'blue' : i === highlightedMeasurementIndex ? 'orange' : null
+      renderSingleMeasurement(trafficMeasurement.measurements[i], color)
     }
 
     isDirty = false
     requestAnimationFrame(render)
   }
 
-  const renderSingleMeasurement = (measurement, isBlue) => {
+  const renderSingleMeasurement = (measurement, color) => {
     const [ maxTransitTime ] = maxTransitTimes
 
     const startAvenueIndex = measurement.startAvenue.charCodeAt(0) - 65
@@ -74,8 +76,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const red = Math.floor(measurement.transitTime / maxTransitTime * 256)
 
     canvasContext.beginPath()
-    canvasContext.strokeStyle = !isBlue ? `rgb(${red}, 0, 0)` : 'blue'
-    canvasContext.lineWidth = !isBlue ? 1 : 3
+    canvasContext.strokeStyle = !color ? `rgb(${red}, 0, 0)` : color
+    canvasContext.lineWidth = !color ? 1 : 3
     canvasContext.moveTo(startAvenueIndex * blockSize, startStreetIndex * blockSize)
     canvasContext.lineTo(endAvenueIndex * blockSize, endStreetIndex * blockSize)
     canvasContext.stroke()
@@ -109,6 +111,32 @@ document.addEventListener('DOMContentLoaded', async () => {
       selectedMeasurementIndex = 0
 
     isDirty = true
+  })
+
+  canvas.addEventListener('mousemove', event => {
+    const padding = 8
+    const { clientX, clientY } = event
+    const translatedX = clientX - translateX
+    const translatedY = clientY - translateY
+
+    const trafficMeasurementIndex = trafficMeasurements[0].measurements.findIndex(measurement => {
+      const startAvenueIndex = measurement.startAvenue.charCodeAt(0) - 65
+      const endAvenueIndex = measurement.endAvenue.charCodeAt(0) - 65
+      const startStreetIndex = parseInt(measurement.startStreet) - 1
+      const endStreetIndex = parseInt(measurement.endStreet) - 1
+      const x1 = startAvenueIndex * blockSize
+      const y1 = startStreetIndex * blockSize
+      const x2 = endAvenueIndex * blockSize
+      const y2 = endStreetIndex * blockSize
+
+      return (translatedX >= x1 - padding && translatedX <= x2 + padding && translatedY >= y1 - padding && translatedY <= y2 + padding)
+    })
+
+    highlightedMeasurementIndex = trafficMeasurementIndex
+    isDirty = true
+
+    console.log('highlightedMeasurementIndex', highlightedMeasurementIndex)
+
   })
 })
 
