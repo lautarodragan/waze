@@ -69,17 +69,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderSingleMeasurement(trafficMeasurement.measurements[i], color)
     }
 
-    if (highlightedCorner) {
-      const x = (highlightedCorner.startAvenue.charCodeAt(0) - 65) * blockSize // - blockSize / 2
-      const y = (parseInt(highlightedCorner.startStreet) - 1) * blockSize // - blockSize / 2
-      canvasContext.fillStyle = 'orange'
-      canvasContext.beginPath();
-      canvasContext.arc(x, y, blockSize / 4, 0, 2 * Math.PI);
-      canvasContext.fill();
-    }
+    if (highlightedCorner)
+      renderCorner(highlightedCorner, 'orange')
+
+    if (selectedCornerA)
+      renderCorner(selectedCornerA, 'red')
+
+    if (selectedCornerB)
+      renderCorner(selectedCornerB, 'green')
 
     isDirty = false
     requestAnimationFrame(render)
+  }
+
+  const renderCorner = (measurement, color = 'orange') => {
+    const x = (measurement.startAvenue.charCodeAt(0) - 65) * blockSize // - blockSize / 2
+    const y = (parseInt(measurement.startStreet) - 1) * blockSize // - blockSize / 2
+    canvasContext.fillStyle = color
+    canvasContext.beginPath();
+    canvasContext.arc(x, y, blockSize / 4, 0, 2 * Math.PI);
+    canvasContext.fill();
   }
 
   const renderSingleMeasurement = (measurement, color) => {
