@@ -134,39 +134,52 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log(`Finding route from (${intersectionA.avenue}, ${intersectionA.street}) to (${intersectionB.avenue}, ${intersectionB.street})`)
 
-
     const recursiveOuter = () => {
       let best = Number.POSITIVE_INFINITY
+      let calls = 0
 
-      const recursiveInner = (avenue, street, intersections = [], totalTransit = 0) => {
+      const recursiveInner = (intersection, intersections = [], totalTransit = 0) => {
+        calls++
+
         if (totalTransit > best)
           return
 
-        if (avenue === intersectionB.avenue && street === intersectionB.street) {
+        const equalsIntersection = intersectionsEq(intersection)
+
+        if (equalsIntersection(intersectionB)) {
           best = totalTransit
-          return [...intersections, { avenue, street }]
+          return [...intersections, intersection]
         }
 
-        if (intersections.some(corner => corner.avenue === avenue && corner.street === street))
+        if (intersections.some(equalsIntersection))
           return
 
-        const segments = trafficMeasurements[0].trafficMeasurement.measurements.filter(measurement => {
-          return measurement.startAvenue === avenue && measurement.startStreet === street
+        const segments = trafficMeasurements[0].measurements.filter(measurement => {
+          return measurement.startAvenue === intersection.avenue && measurement.startStreet === intersection.street
         })
 
         const paths = segments.map(segment =>
-          recursiveInner(avenue + 1, street, [...intersections, { avenue, street }], totalTransit + segment.transitTime)
+          recursiveInner({ avenue: segment.endAvenue, street: segment.endStreet }, [...intersections, intersection], totalTransit + segment.transitTime)
         )
 
-        return paths.find(_ => _)
+        for (let i = paths.length - 1; i--; i >= 0)
+          if (paths[i])
+            return paths[i]
+
+        // return paths.find(_ => _)
       }
 
-      return recursiveInner(intersectionA.avenue, intersectionA.street)
+      return recursiveInner(intersectionA)
 
     }
 
+    const bestPath = recursiveOuter()
+
+    console.log('bestPath', calls, bestPath)
+
   }
 
+  const intersectionsEq = a => b => a.street === b.street && a.avenue === b.avenue
 
   setCanvasSize()
 
