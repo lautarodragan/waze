@@ -154,11 +154,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           return measurement.startAvenue === avenue && measurement.startStreet === street
         })
 
-        for (const segment of segments) {
-          const a = recursiveInner(avenue + 1, street, [...intersections, { avenue, street }], totalTransit + segment.transitTime)
-        }
+        const paths = segments.map(segment =>
+          recursiveInner(avenue + 1, street, [...intersections, { avenue, street }], totalTransit + segment.transitTime)
+        )
 
-        return a
+        return paths.find(_ => _)
       }
 
       return recursiveInner(intersectionA.avenue, intersectionA.street)
