@@ -122,15 +122,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       return
     }
 
-    const intersectionA = {
-      avenue: selectedCornerA.startAvenue,
-      street: selectedCornerA.startStreet,
-    }
-
-    const intersectionB = {
-      avenue: selectedCornerB.startAvenue,
-      street: selectedCornerB.startStreet,
-    }
+    const intersectionA = segmentToIntersection(selectedCornerA)
+    const intersectionB = segmentToIntersection(selectedCornerB)
 
     console.log(`Finding route from (${intersectionA.avenue}, ${intersectionA.street}) to (${intersectionB.avenue}, ${intersectionB.street})`)
 
@@ -169,8 +162,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           return
 
         // find all possible next steps
-        const segments = trafficMeasurements[0].measurements.filter(measurement => {
-          return measurement.startAvenue === intersection.avenue && measurement.startStreet === intersection.street
+        const segments = trafficMeasurements[0].measurements.filter(segment => {
+          return segment.startAvenue === intersection.avenue && segment.startStreet === intersection.street
         })
 
         // optimization: travel linearly closest paths first
@@ -186,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // by now we found up to 4 routes from A to B.
         // latter entries in the array will be better than earlier due to bestTransit optimization,
         // so we navigate it backwards and return the first successful path
-        for (let i = paths.length - 1; i--; i >= 0)
+        for (let i = paths.length - 1; i >= 0; i--)
           if (paths[i])
             return paths[i]
 
@@ -198,11 +191,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const bestPath = recursiveOuter()
 
     console.log('%cPath Finder Result', 'font-weight: bold')
-    console.log(`steps traveled: ${calls}`)
-    console.log(`valid routes found: ${foundPaths}`)
-    console.log(`discardedRoutes: ${discardedRoutes}`)
-    console.log(`transit: ${bestTransit}`)
+    console.log(`Steps traveled: ${calls}`)
+    console.log(`Valid routes found: ${foundPaths}`)
+    console.log(`Discarded routes: ${discardedRoutes}`)
+    console.log(`Route total transit: ${bestTransit}`)
     console.log(bestPath)
+    console.log()
 
   }
 
