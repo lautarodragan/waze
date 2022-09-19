@@ -122,19 +122,51 @@ document.addEventListener('DOMContentLoaded', async () => {
       return
     }
 
-    const cornerA = {
+    const intersectionA = {
       avenue: selectedCornerA.startAvenue,
       street: selectedCornerA.startStreet,
     }
 
-    const cornerB = {
+    const intersectionB = {
       avenue: selectedCornerB.startAvenue,
       street: selectedCornerB.startStreet,
     }
 
-    console.log(`Finding route from (${cornerA.avenue}, ${cornerA.street}) to (${cornerB.avenue}, ${cornerB.street})`)
+    console.log(`Finding route from (${intersectionA.avenue}, ${intersectionA.street}) to (${intersectionB.avenue}, ${intersectionB.street})`)
+
+
+    const recursiveOuter = () => {
+      let best = Number.POSITIVE_INFINITY
+
+      const recursiveInner = (avenue, street, intersections = [], totalTransit = 0) => {
+        if (totalTransit > best)
+          return
+
+        if (avenue === intersectionB.avenue && street === intersectionB.street) {
+          best = totalTransit
+          return [...intersections, { avenue, street }]
+        }
+
+        if (intersections.some(corner => corner.avenue === avenue && corner.street === street))
+          return
+
+        const segments = trafficMeasurements[0].trafficMeasurement.measurements.filter(measurement => {
+          return measurement.startAvenue === avenue && measurement.startStreet === street
+        })
+
+        for (const segment of segments) {
+          const a = recursiveInner(avenue + 1, street, [...intersections, { avenue, street }], totalTransit + segment.transitTime)
+        }
+
+        return a
+      }
+
+      return recursiveInner(intersectionA.avenue, intersectionA.street)
+
+    }
 
   }
+
 
   setCanvasSize()
 
