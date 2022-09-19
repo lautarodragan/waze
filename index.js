@@ -142,31 +142,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       const recursiveInner = (intersection, intersections = [], totalTransit = 0) => {
         calls++
 
+        // optimization: discard this path completely if we haven't reached the goal and it's already worse than another found path
         if (totalTransit > best)
           return
 
         const equalsIntersection = intersectionsEq(intersection)
 
+        // are you winning, son?
         if (equalsIntersection(intersectionB)) {
           best = totalTransit
           return [...intersections, intersection]
         }
 
+        // infinite loop avoidance: no sense in going over the same intersection twice
         if (intersections.some(equalsIntersection))
           return
 
+        // find all possible next steps
         const segments = trafficMeasurements[0].measurements.filter(measurement => {
           return measurement.startAvenue === intersection.avenue && measurement.startStreet === intersection.street
         })
 
+        // optimization: travel linearly closest paths first
         const sortedSegments = [...segments].sort((a, b) =>
           linearDistanceBetweenIntersections({ avenue: a.endAvenue, street: a.endStreet }, intersectionB) - linearDistanceBetweenIntersections({ avenue: b.endAvenue, street: b.endStreet }, intersectionB)
         )
 
+        // travel on...
         const paths = sortedSegments.map(segment =>
           recursiveInner({ avenue: segment.endAvenue, street: segment.endStreet }, [...intersections, intersection], totalTransit + segment.transitTime)
         )
 
+        // by now we found up to 4 routes from A to B.
+        // latter entries in the array will be better than earlier due to bestTransit optimization,
+        // so we navigate it backwards and return the first successful path
         for (let i = paths.length - 1; i--; i >= 0)
           if (paths[i])
             return paths[i]
