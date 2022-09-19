@@ -134,9 +134,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log(`Finding route from (${intersectionA.avenue}, ${intersectionA.street}) to (${intersectionB.avenue}, ${intersectionB.street})`)
 
+    let calls = 0
+
     const recursiveOuter = () => {
       let best = Number.POSITIVE_INFINITY
-      let calls = 0
 
       const recursiveInner = (intersection, intersections = [], totalTransit = 0) => {
         calls++
@@ -158,7 +159,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           return measurement.startAvenue === intersection.avenue && measurement.startStreet === intersection.street
         })
 
-        const paths = segments.map(segment =>
+        const sortedSegments = [...segments].sort((a, b) =>
+          linearDistanceBetweenIntersections({ avenue: a.endAvenue, street: a.endStreet }, intersectionB) - linearDistanceBetweenIntersections({ avenue: b.endAvenue, street: b.endStreet }, intersectionB)
+        )
+
+        const paths = sortedSegments.map(segment =>
           recursiveInner({ avenue: segment.endAvenue, street: segment.endStreet }, [...intersections, intersection], totalTransit + segment.transitTime)
         )
 
@@ -166,11 +171,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (paths[i])
             return paths[i]
 
-        // return paths.find(_ => _)
       }
 
       return recursiveInner(intersectionA)
-
     }
 
     const bestPath = recursiveOuter()
@@ -180,6 +183,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const intersectionsEq = a => b => a.street === b.street && a.avenue === b.avenue
+
+  const linearDistanceBetweenIntersections = (a, b) => {
+    const startAvenueIndex = a.avenue.charCodeAt(0) - 65
+    const startStreetIndex = parseInt(a.street) - 1
+    const endAvenueIndex = b.avenue.charCodeAt(0) - 65
+    const endStreetIndex = parseInt(b.street) - 1
+
+    return Math.sqrt((endAvenueIndex - startAvenueIndex) ** 2 + (endStreetIndex - startStreetIndex) ** 2)
+  }
 
   setCanvasSize()
 
