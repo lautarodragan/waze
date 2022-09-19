@@ -102,8 +102,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const red = Math.floor(measurement.transitTime / maxTransitTime * 256)
 
     canvasContext.beginPath()
-    canvasContext.strokeStyle = !color ? `rgb(${red}, 0, 0)` : color
-    canvasContext.lineWidth = !color ? 1 : 3
+    canvasContext.strokeStyle = !color ? `rgb(${red}, 0, 0, .5)` : color
+    canvasContext.lineWidth = !color ? 2 : 3
     canvasContext.moveTo(startAvenueIndex * blockSize, startStreetIndex * blockSize)
     canvasContext.lineTo(endAvenueIndex * blockSize, endStreetIndex * blockSize)
     canvasContext.stroke()
