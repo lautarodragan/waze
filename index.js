@@ -116,6 +116,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     translateX = undefined
   }
 
+  const findRoute = () => {
+    if (!selectedCornerA || !selectedCornerB) {
+      console.log('Select Corner A and B first.')
+      return
+    }
+
+    const cornerA = {
+      avenue: selectedCornerA.startAvenue,
+      street: selectedCornerA.startStreet,
+    }
+
+    const cornerB = {
+      avenue: selectedCornerB.startAvenue,
+      street: selectedCornerB.startStreet,
+    }
+
+    console.log(`Finding route from (${cornerA.avenue}, ${cornerA.street}) to (${cornerB.avenue}, ${cornerB.street})`)
+
+  }
+
   setCanvasSize()
 
   requestAnimationFrame(render)
@@ -126,6 +146,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('keydown', event => {
     // console.log('keydown', event)
+
+    if (event.key === 'Enter') {
+      findRoute()
+      return
+    }
+
     if (event.key === 'ArrowDown')
       selectedMeasurementIndex--
     else if (event.key === 'ArrowUp')
