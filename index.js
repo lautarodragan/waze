@@ -175,12 +175,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // optimization: travel linearly closest paths first
         const sortedSegments = [...segments].sort((a, b) =>
-          linearDistanceBetweenIntersections({ avenue: a.endAvenue, street: a.endStreet }, intersectionB) - linearDistanceBetweenIntersections({ avenue: b.endAvenue, street: b.endStreet }, intersectionB)
+          linearDistanceFromSegmentEndToIntersection(a, intersectionB) - linearDistanceFromSegmentEndToIntersection(b, intersectionB)
         )
 
         // travel on...
         const paths = sortedSegments.map(segment =>
-          recursiveInner({ avenue: segment.endAvenue, street: segment.endStreet }, [...intersections, intersection], totalTransit + segment.transitTime)
+          recursiveInner(segmentToIntersection(segment, 'end'), [...intersections, intersection], totalTransit + segment.transitTime)
         )
 
         // by now we found up to 4 routes from A to B.
@@ -216,6 +216,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     return Math.sqrt((endAvenueIndex - startAvenueIndex) ** 2 + (endStreetIndex - startStreetIndex) ** 2)
   }
+
+  const segmentToIntersection = (segment, part = 'start') => ({
+    avenue: segment[`${part}Avenue`],
+    street: segment[`${part}Street`],
+  })
+
+  const linearDistanceFromSegmentEndToIntersection = (segment, intersection) =>
+    linearDistanceBetweenIntersections(segmentToIntersection(segment, 'end'), intersection)
 
   setCanvasSize()
 
