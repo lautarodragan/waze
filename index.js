@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let selectedCornerB = null
   let translateX
   let translateY
+  let foundPath = null
 
   const render = () => {
     if (!isDirty) {
@@ -69,6 +70,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderSingleMeasurement(trafficMeasurement.measurements[i], color)
     }
 
+    if (foundPath) {
+      for (const intersection of foundPath) {
+        renderIntersection(intersection, 'blue')
+      }
+    }
+
     if (highlightedCorner)
       renderCorner(highlightedCorner, 'orange')
 
@@ -85,6 +92,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const renderCorner = (measurement, color = 'orange') => {
     const x = (measurement.startAvenue.charCodeAt(0) - 65) * blockSize // - blockSize / 2
     const y = (parseInt(measurement.startStreet) - 1) * blockSize // - blockSize / 2
+    canvasContext.fillStyle = color
+    canvasContext.beginPath();
+    canvasContext.arc(x, y, blockSize / 4, 0, 2 * Math.PI);
+    canvasContext.fill();
+  }
+
+  const renderIntersection = (intersection, color = 'orange') => {
+    const x = (intersection.avenue.charCodeAt(0) - 65) * blockSize // - blockSize / 2
+    const y = (parseInt(intersection.street) - 1) * blockSize // - blockSize / 2
     canvasContext.fillStyle = color
     canvasContext.beginPath();
     canvasContext.arc(x, y, blockSize / 4, 0, 2 * Math.PI);
@@ -198,6 +214,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(bestPath)
     console.log()
 
+    foundPath = bestPath
+
   }
 
   const intersectionsEq = a => b => a.street === b.street && a.avenue === b.avenue
@@ -232,6 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (event.key === 'Enter') {
       findRoute()
+      isDirty = true
       return
     }
 
