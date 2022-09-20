@@ -148,15 +148,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     let bestTransit = Number.POSITIVE_INFINITY
     let discardedRoutes = 0
 
+    const logPathFinderData = () => {
+      console.log(`Steps traveled: ${calls}`)
+      console.log(`Valid routes found: ${foundPaths}`)
+      console.log(`Discarded routes: ${discardedRoutes}`)
+      console.log(`Route total transit: ${bestTransit}`)
+    }
+
     const recursiveOuter = () => {
       const recursiveInner = (intersection, intersections = [], totalTransit = 0) => {
         calls++
 
-        if (calls % 10_000 === 0)
-          debugger
+        // if (calls % 10_000 === 0)
+        //   debugger
 
-        if (calls > 100_000)
+        if (calls > 200_000) {
+          logPathFinderData()
           throw new Error('Nope. This is not working.')
+        }
 
         // optimization: discard this path completely if we haven't reached the goal and it's already worse than another found path
         if (totalTransit >= bestTransit) {
@@ -207,10 +216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const bestPath = recursiveOuter()
 
     console.log('%cPath Finder Result', 'font-weight: bold')
-    console.log(`Steps traveled: ${calls}`)
-    console.log(`Valid routes found: ${foundPaths}`)
-    console.log(`Discarded routes: ${discardedRoutes}`)
-    console.log(`Route total transit: ${bestTransit}`)
+    logPathFinderData()
     console.log(bestPath)
     console.log()
 
